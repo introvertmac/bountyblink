@@ -33,7 +33,7 @@ import {
   export const GET = async (req: Request): Promise<Response> => {
     const payload: ActionGetResponse = {
       title: "Hackathon Buddy Finder",
-      icon: new URL("/jack.png", new URL(req.url).origin).toString(),
+      icon: new URL("/jack.jpg", new URL(req.url).origin).toString(),
       description: "Enter your details in the format: [username] [skill initial] > [desired skill initial]\nUse F for Frontend, B for Backend, D for Design, A for Any\nExample: JohnDoe F > B",
       label: "Find Buddy",
       links: {
