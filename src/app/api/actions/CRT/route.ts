@@ -77,7 +77,7 @@ export const GET = async (req: Request) => {
       },
     };
 
-    // Create action get response and track render event
+    // Create action get response (this also tracks the render event)
     const payload = await blinksights.createActionGetResponseV1(req.url, basePayload);
 
     return Response.json(payload, {
@@ -120,7 +120,12 @@ export const POST = async (req: Request) => {
     }
 
     // Track interaction event
-    await blinksights.trackActionV2(account, req.url);
+    try {
+      await blinksights.trackActionV2(walletAddress.toString(), req.url);
+    } catch (error) {
+      console.error("Error tracking action:", error);
+      // Continue execution even if tracking fails
+    }
 
     // Create a minimal transaction (sending 0 SOL to self)
     const transaction = new Transaction().add(
@@ -132,7 +137,13 @@ export const POST = async (req: Request) => {
     );
 
     // Get Blinksights memo instruction
-    const blinksightsMemoInstruction = await blinksights.getActionIdentityInstructionV2(account, req.url);
+    let blinksightsMemoInstruction: TransactionInstruction | undefined;
+    try {
+      blinksightsMemoInstruction = await blinksights.getActionIdentityInstructionV2(walletAddress.toString(), req.url);
+    } catch (error) {
+      console.error("Error getting action identity instruction:", error);
+      // Continue execution even if getting the instruction fails
+    }
 
     // Add Blinksights memo instruction to the transaction if it exists
     if (blinksightsMemoInstruction) {
