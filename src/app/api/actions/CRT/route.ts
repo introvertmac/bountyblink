@@ -51,7 +51,7 @@ Submit your X thread link below. May the best thread win! 🏆
 export const GET = async (req: Request) => {
   const payload: ActionGetResponse = {
     title: "Carrot DeFi X Thread Challenge",
-    icon: new URL("/carrot.png", new URL(req.url).origin).toString(),
+    icon: new URL("/crt.png", new URL(req.url).origin).toString(),
     description: bountyDescription,
     label: "Submit X Thread",
     links: {
