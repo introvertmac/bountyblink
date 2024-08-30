@@ -10,14 +10,9 @@ import {
   Connection, 
   Transaction, 
   SystemProgram, 
-  LAMPORTS_PER_SOL,
-  TransactionInstruction
+  LAMPORTS_PER_SOL 
 } from "@solana/web3.js";
 import Airtable from 'airtable';
-import { BlinksightsClient } from 'blinksights-sdk';
-
-// Blinksights setup
-const blinksights = new BlinksightsClient(process.env.ANALYTICS || '');
 
 // Airtable setup
 const AIRTABLE_PERSONAL_ACCESS_TOKEN = process.env.AIRTABLE_PERSONAL_ACCESS_TOKEN;
@@ -48,48 +43,37 @@ Prizes:
 🥈 2nd Place: 1,000 $SEND
 🥉 3rd Place: 500 $SEND
 
-Deadline: September 2, 2023, 11:00 PM IST
+Deadline: September 2, 2023, 00:00 IST (September 1 midnight)
 
 Submit your X thread link below. May the best thread win! 🏆
 `;
 
 export const GET = async (req: Request) => {
-  try {
-    const basePayload: ActionGetResponse = {
-      title: "Carrot DeFi X Thread Challenge",
-      icon: new URL("/crt.png", new URL(req.url).origin).toString(),
-      description: bountyDescription,
-      label: "Submit X Thread",
-      links: {
-        actions: [
-          {
-            label: "Submit Thread",
-            href: "/api/actions/CRT?threadUrl={threadUrl}",
-            parameters: [
-              {
-                name: "threadUrl",
-                label: "Enter your X thread URL",
-                required: true,
-              },
-            ],
-          },
-        ],
-      },
-    };
+  const payload: ActionGetResponse = {
+    title: "Carrot DeFi X Thread Challenge",
+    icon: new URL("/carrot.png", new URL(req.url).origin).toString(),
+    description: bountyDescription,
+    label: "Submit X Thread",
+    links: {
+      actions: [
+        {
+          label: "Submit Thread",
+          href: "/api/actions/CRT?threadUrl={threadUrl}",
+          parameters: [
+            {
+              name: "threadUrl",
+              label: "Enter your X thread URL",
+              required: true,
+            },
+          ],
+        },
+      ],
+    },
+  };
 
-    // Create action get response (this also tracks the render event)
-    const payload = await blinksights.createActionGetResponseV1(req.url, basePayload);
-
-    return Response.json(payload, {
-      headers: ACTIONS_CORS_HEADERS,
-    });
-  } catch (error) {
-    console.error("Error in GET request:", error);
-    return Response.json({ error: "An error occurred processing your request" }, {
-      status: 500,
-      headers: ACTIONS_CORS_HEADERS,
-    });
-  }
+  return Response.json(payload, {
+    headers: ACTIONS_CORS_HEADERS,
+  });
 };
 
 export const OPTIONS = GET;
@@ -119,14 +103,6 @@ export const POST = async (req: Request) => {
       throw new Error("Invalid X thread URL. Please submit a valid X.com or Twitter.com URL.");
     }
 
-    // Track interaction event
-    try {
-      await blinksights.trackActionV2(walletAddress.toString(), req.url);
-    } catch (error) {
-      console.error("Error tracking action:", error);
-      // Continue execution even if tracking fails
-    }
-
     // Create a minimal transaction (sending 0 SOL to self)
     const transaction = new Transaction().add(
       SystemProgram.transfer({
@@ -135,20 +111,6 @@ export const POST = async (req: Request) => {
         lamports: 0,
       })
     );
-
-    // Get Blinksights memo instruction
-    let blinksightsMemoInstruction: TransactionInstruction | undefined;
-    try {
-      blinksightsMemoInstruction = await blinksights.getActionIdentityInstructionV2(walletAddress.toString(), req.url);
-    } catch (error) {
-      console.error("Error getting action identity instruction:", error);
-      // Continue execution even if getting the instruction fails
-    }
-
-    // Add Blinksights memo instruction to the transaction if it exists
-    if (blinksightsMemoInstruction) {
-      transaction.add(blinksightsMemoInstruction);
-    }
 
     // Set recent blockhash and fee payer
     const { blockhash } = await connection.getLatestBlockhash();
