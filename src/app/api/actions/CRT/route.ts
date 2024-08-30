@@ -54,33 +54,42 @@ Submit your X thread link below. May the best thread win! 🏆
 `;
 
 export const GET = async (req: Request) => {
-  const basePayload: ActionGetResponse = {
-    title: "Carrot DeFi X Thread Challenge",
-    icon: new URL("/crt.png", new URL(req.url).origin).toString(),
-    description: bountyDescription,
-    label: "Submit X Thread",
-    links: {
-      actions: [
-        {
-          label: "Submit Thread",
-          href: "/api/actions/CRT?threadUrl={threadUrl}",
-          parameters: [
-            {
-              name: "threadUrl",
-              label: "Enter your X thread URL",
-              required: true,
-            },
-          ],
-        },
-      ],
-    },
-  };
+  try {
+    const basePayload: ActionGetResponse = {
+      title: "Carrot DeFi X Thread Challenge",
+      icon: new URL("/crt.png", new URL(req.url).origin).toString(),
+      description: bountyDescription,
+      label: "Submit X Thread",
+      links: {
+        actions: [
+          {
+            label: "Submit Thread",
+            href: "/api/actions/CRT?threadUrl={threadUrl}",
+            parameters: [
+              {
+                name: "threadUrl",
+                label: "Enter your X thread URL",
+                required: true,
+              },
+            ],
+          },
+        ],
+      },
+    };
 
-  const payload = await blinksights.createActionGetResponseV1(req.url, basePayload);
+    // Create action get response and track render event
+    const payload = await blinksights.createActionGetResponseV1(req.url, basePayload);
 
-  return Response.json(payload, {
-    headers: ACTIONS_CORS_HEADERS,
-  });
+    return Response.json(payload, {
+      headers: ACTIONS_CORS_HEADERS,
+    });
+  } catch (error) {
+    console.error("Error in GET request:", error);
+    return Response.json({ error: "An error occurred processing your request" }, {
+      status: 500,
+      headers: ACTIONS_CORS_HEADERS,
+    });
+  }
 };
 
 export const OPTIONS = GET;
