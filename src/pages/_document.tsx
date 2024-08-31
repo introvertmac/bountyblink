@@ -7,7 +7,7 @@ export default function Document() {
     <Html lang="en">
       <Head>
         <meta name="dscvr:canvas:version" content="vNext" />
-        <meta name="og:image" content="https://your-domain.com/crt.png" />
+        <meta name="og:image" content="https://www.dappshunt.xyz/crt.png" />
       </Head>
       <body>
         <Main />
