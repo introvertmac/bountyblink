@@ -56,6 +56,12 @@ Deadline: September 2, 2023, 00:00 IST (September 1 midnight)
 Submit your X thread link below. May the best thread win! 🏆
 `;
 
+function getFullUrl(req: Request): string {
+  const host = req.headers.get('host') || 'localhost:3000';
+  const protocol = host.startsWith('localhost') ? 'http' : 'https';
+  return `${protocol}://${host}${new URL(req.url).pathname}`;
+}
+
 export const GET = async (req: Request) => {
   try {
     const basePayload: ActionGetResponse = {
@@ -80,8 +86,9 @@ export const GET = async (req: Request) => {
       },
     };
 
+    const fullUrl = getFullUrl(req);
     // Use Blinksights to create the ActionGetResponse
-    const payload = await blinksightsClient.createActionGetResponseV2(req.url, basePayload);
+    const payload = await blinksightsClient.createActionGetResponseV2(fullUrl, basePayload);
 
     return Response.json(payload, {
       headers: ACTIONS_CORS_HEADERS,
@@ -148,8 +155,14 @@ export const POST = async (req: Request) => {
       },
     });
 
+    const fullUrl = getFullUrl(req);
     // Track interaction using Blinksights
-    await blinksightsClient.trackActionV2(account, req.url);
+    try {
+      await blinksightsClient.trackActionV2(walletAddress.toString(), fullUrl);
+      console.log('Interaction tracked successfully');
+    } catch (error) {
+      console.error('Error tracking interaction:', error);
+    }
 
     return Response.json(payload, {
       headers: ACTIONS_CORS_HEADERS,
