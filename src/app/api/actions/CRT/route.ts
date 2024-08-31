@@ -9,18 +9,17 @@ import {
   PublicKey, 
   Connection, 
   Transaction, 
-  SystemProgram, 
-  LAMPORTS_PER_SOL 
+  SystemProgram,
 } from "@solana/web3.js";
 import Airtable from 'airtable';
 import { BlinksightsClient } from 'blinksights-sdk';
 
 // Airtable setup
-const AIRTABLE_PERSONAL_ACCESS_TOKEN = process.env.AIRTABLE_PERSONAL_ACCESS_TOKEN || '';
-const AIRTABLE_BASE1_ID = process.env.AIRTABLE_BASE1_ID || '';
+const AIRTABLE_PERSONAL_ACCESS_TOKEN = process.env.AIRTABLE_PERSONAL_ACCESS_TOKEN;
+const AIRTABLE_BASE1_ID = process.env.AIRTABLE_BASE1_ID;
 
 if (!AIRTABLE_PERSONAL_ACCESS_TOKEN || !AIRTABLE_BASE1_ID) {
-  console.error('Airtable configuration is missing. Please check your environment variables.');
+  throw new Error('Airtable configuration is missing. Please check your environment variables.');
 }
 
 const base = new Airtable({apiKey: AIRTABLE_PERSONAL_ACCESS_TOKEN}).base(AIRTABLE_BASE1_ID);
@@ -29,9 +28,9 @@ const base = new Airtable({apiKey: AIRTABLE_PERSONAL_ACCESS_TOKEN}).base(AIRTABL
 const connection = new Connection('https://mainnet.helius-rpc.com/?api-key=41cf9b1c-2c4f-477a-9cf6-349393ca6071');
 
 // Blinksights setup
-const BLINKSIGHTS_ACCESS_TOKEN = process.env.ANALYTICS || '';
+const BLINKSIGHTS_ACCESS_TOKEN = process.env.ANALYTICS;
 if (!BLINKSIGHTS_ACCESS_TOKEN) {
-  console.error('Blinksights access token is missing. Please check your environment variables.');
+  throw new Error('Blinksights access token is missing. Please check your environment variables.');
 }
 const blinksightsClient = new BlinksightsClient(BLINKSIGHTS_ACCESS_TOKEN);
 
@@ -56,15 +55,9 @@ Deadline: September 2, 2023, 00:00 IST (September 1 midnight)
 Submit your X thread link below. May the best thread win! 🏆
 `;
 
-function getFullUrl(req: Request): string {
-  const host = req.headers.get('host') || 'localhost:3000';
-  const protocol = host.startsWith('localhost') ? 'http' : 'https';
-  return `${protocol}://${host}${new URL(req.url).pathname}`;
-}
-
 export const GET = async (req: Request) => {
   try {
-    const basePayload: ActionGetResponse = {
+    const basePayload = {
       title: "Carrot DeFi X Thread Challenge",
       icon: new URL("/crt.png", new URL(req.url).origin).toString(),
       description: bountyDescription,
@@ -86,9 +79,8 @@ export const GET = async (req: Request) => {
       },
     };
 
-    const fullUrl = getFullUrl(req);
     // Use Blinksights to create the ActionGetResponse
-    const payload = await blinksightsClient.createActionGetResponseV2(fullUrl, basePayload);
+    const payload: ActionGetResponse = await blinksightsClient.createActionGetResponseV2(req.url, basePayload);
 
     return Response.json(payload, {
       headers: ACTIONS_CORS_HEADERS,
@@ -155,14 +147,8 @@ export const POST = async (req: Request) => {
       },
     });
 
-    const fullUrl = getFullUrl(req);
     // Track interaction using Blinksights
-    try {
-      await blinksightsClient.trackActionV2(walletAddress.toString(), fullUrl);
-      console.log('Interaction tracked successfully');
-    } catch (error) {
-      console.error('Error tracking interaction:', error);
-    }
+    await blinksightsClient.trackActionV2(account, req.url);
 
     return Response.json(payload, {
       headers: ACTIONS_CORS_HEADERS,
