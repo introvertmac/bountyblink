@@ -1,10 +1,11 @@
 # Bounty Blink
 
-Bounty Blink is a Solana-based application that allows users to participate in X (formerly Twitter) thread challenges and submit their entries for rewards. This project uses Next.js, Solana Web3.js, Airtable for data storage, and Blinksights for analytics.
+Bounty Blink is a Solana-blink application that allows users to participate in X (formerly Twitter) thread challenges and submit their entries for rewards. 
+Bounty Blink uses Next.js, Solana Web3.js, Airtable for data storage, and Blinksights for analytics.
 
 ## Features
 
-- Displays challenge details and instructions
+- Displays challenge details and instructions in a Blink
 - Allows users to submit their X thread URLs
 - Validates wallet addresses and X thread URLs
 - Stores submissions in Airtable
