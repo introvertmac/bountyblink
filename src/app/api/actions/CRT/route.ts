@@ -50,7 +50,7 @@ Prizes:
 🥈 2nd Place: 1,000 $SEND
 🥉 3rd Place: 500 $SEND
 
-Deadline: September 2, 2023, 00:00 IST (September 1 midnight)
+Deadline: September 2, 2023, 11:00 PM IST 
 
 Submit your X thread link below. May the best thread win! 🏆
 `;
